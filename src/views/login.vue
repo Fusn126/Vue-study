@@ -1,17 +1,17 @@
 <template>
   <div class="login">
     <div class="login-form">
-      <n-form :label-width="80" :model="formValue" :rules="rules" :size="size" label-placement="left">
+      <n-form :label-width="80" :model="formValue" :rules="rules" :size="size" label-placement="left" ref="formRef">
         <n-form-item  path="username">
           <n-input v-model:value="formValue.username" placeholder="请输入用户名" round/>
         </n-form-item>
         <n-form-item  path="password">
-          <n-input placeholder="请输入密码" v-model:value="formValue.password" round />
+          <n-input placeholder="请输入密码" v-model:value="formValue.password" round  type="password" show-password-on="mousedown"/>
         </n-form-item>
         <span class="button">
           <n-form-item>
-            <n-button @click="handleClick" attr-type="button" class="button-left" type="primary">登录</n-button>
-            <n-button @click="handleClick" attr-type="button" type="info">注册</n-button>
+            <n-button @click="handleClick('login')" attr-type="button" class="button-left" type="primary" round>登录</n-button>
+            <n-button @click="handleClick('register')" attr-type="button" type="info" round>注册</n-button>
           </n-form-item>
         </span>
       </n-form>
@@ -21,43 +21,90 @@
 
 <script lang="ts">
 import {
-  defineComponent
+  defineComponent,
+  ref,
+  reactive,
+  toRefs
 } from 'vue'
+import { useMessage } from 'naive-ui'
+import { login, register } from '@/api/login'
+const formRef = ref(null)
 export default defineComponent({
-  data () {
+  setup () {
+    const { data, handleClick } = logAndReg()
     return {
-      size: 'medium',
-      formValue: {
-        username: '',
-        password: ''
-      },
-      rules: {
-        username: {
-          required: true,
-          message: '请输入姓名',
-          trigger: 'blur'
-        },
-        password: {
-          required: true,
-          message: '请输入年龄',
-          trigger: 'blur'
-        }
-      }
-    }
-  },
-  methods: {
-    handleClick () {
-      console.log('我们开始了')
+      ...toRefs(data), formRef, handleClick
     }
   }
 })
+function logAndReg () {
+  const message = useMessage()
+  const data = reactive({
+    size: 'medium',
+    formValue: {
+      username: '',
+      password: ''
+    },
+    rules: {
+      username: {
+        required: true,
+        message: '请输入用户名',
+        trigger: 'blur'
+      },
+      password: {
+        required: true,
+        message: '请输入密码',
+        trigger: 'blur'
+      }
+    }
+  })
+  function handleClick (type) {
+    formRef.value.validate((errors) => {
+      if (!errors) {
+        const param = {
+          account: data.formValue.username,
+          pwd: data.formValue.password
+        }
+        switch (type) {
+          case 'login': {
+            login(param).then(res => {
+              if (res?.data?.code === 200) {
+                message.success('登录成功')
+              } else {
+                message.error(res.data.msg || '登录失败，请重试')
+              }
+            }).catch((err) => {
+              console.log(err)
+            })
+            break
+          }
+          case 'register': {
+            register(param).then(res => {
+              if (res?.data?.code === 200) {
+                message.success('注册成功')
+              } else {
+                message.error(res.data.msg || '注册失败，请重试')
+              }
+            }).catch((err) => {
+              console.log(err)
+            })
+            break
+          }
+        }
+      } else {
+        message.error('验证失败,请好好填写相关信息')
+      }
+    })
+  }
+  return { data, formRef, handleClick }
+}
 </script>
 <style scoped lang="less">
   .login {
     width: 100%;
     height: 100vh;
     display: flex;
-    background-image: url("../assets/background.png");
+    background-image: url("../assets/back.png");
     align-items: center;
     justify-content: center;
 

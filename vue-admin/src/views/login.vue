@@ -5,6 +5,9 @@
         <n-form-item  path="username">
           <n-input v-model:value="formValue.username" placeholder="请输入用户名" round/>
         </n-form-item>
+        <n-form-item  path="email">
+          <n-input v-model:value="formValue.email" placeholder="请输入电子邮件" round/>
+        </n-form-item>
         <n-form-item  path="password">
           <n-input placeholder="请输入密码" v-model:value="formValue.password" round  type="password" show-password-on="mousedown"/>
         </n-form-item>
@@ -43,7 +46,8 @@ function logAndReg () {
     size: 'medium',
     formValue: {
       username: '',
-      password: ''
+      password: '',
+      email: ''
     },
     rules: {
       username: {
@@ -62,8 +66,9 @@ function logAndReg () {
     formRef.value.validate((errors) => {
       if (!errors) {
         const param = {
-          account: data.formValue.username,
-          pwd: data.formValue.password
+          name: data.formValue.username,
+          password: data.formValue.password,
+          email: data.formValue.email
         }
         switch (type) {
           case 'login': {
@@ -71,7 +76,7 @@ function logAndReg () {
               if (res?.data?.code === 200) {
                 message.success('登录成功')
               } else {
-                message.error(res.data.msg || '登录失败，请重试')
+                message.error(res.data.message || '登录失败，请重试')
               }
             }).catch((err) => {
               console.log(err)
@@ -83,7 +88,7 @@ function logAndReg () {
               if (res?.data?.code === 200) {
                 message.success('注册成功')
               } else {
-                message.error(res.data.msg || '注册失败，请重试')
+                message.error(res.data.message || '注册失败，请重试')
               }
             }).catch((err) => {
               console.log(err)
@@ -111,7 +116,7 @@ function logAndReg () {
     .login-form {
       padding: 50px 50px 10px 3.125rem;
       width: 300px;
-      height: 200px;
+      height: 225px;
       backdrop-filter: blur(2px);
       border: 4px solid;
       border-color: transparent;
